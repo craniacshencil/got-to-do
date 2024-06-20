@@ -23,8 +23,9 @@ func main() {
 	}
 
 	r.Get("/", responses.Dashboard)
+	r.Get("/signup", responses.Signup)
 
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal("ERROR:", err)
-	}
+    }
 }

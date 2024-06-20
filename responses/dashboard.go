@@ -8,13 +8,23 @@ import (
 
 const (
 	dashboardHtml = "static/dash.html"
+	signupHtml = "static/signup.html"
 )
 
 func Dashboard(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles(dashboardHtml)
+	dashTemplate, err := template.ParseFiles(dashboardHtml)
 	if err != nil {
 		log.Fatal("ERROR:", err)
 	} else {
-		t.Execute(w, nil)
+		dashTemplate.Execute(w, nil)
+	}
+}
+
+func Signup(w http.ResponseWriter, r *http.Request) {
+	signupTemplate, err := template.ParseFiles(signupHtml)
+	if err != nil {
+		log.Fatal("ERROR:", err)
+	} else {
+		signupTemplate.Execute(w, nil)
 	}
 }
