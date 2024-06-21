@@ -14,18 +14,18 @@
         <h1 class="font-sans bg-slate-700 w-full text-6xl font-bold text-slate-200 text-center py-11 rounded-md">Sign In</h1>
         <form class="flex flex-col justify-center items-center gap-2">
             <input class="block rounded-md p-2 bg-slate-900 outline-black focus-visible:outline-none focus-visible:outline-black focus-visible:outline-1 text-xl text-slate-400 mb-3" type="text"
-                name="username" placeholder="Username" />
+                name="username" placeholder="Username" required />
 
             <input class="block rounded-md p-2 bg-slate-900 outline-black focus-visible:outline-none focus-visible:outline-black focus-visible:outline-1 text-xl text-slate-400 mb-3" type="text"
-                name="firstname" placeholder="First Name" />
+                name="firstName" placeholder="First Name" required />
             <input class="block rounded-md p-2 bg-slate-900 outline-black focus-visible:outline-none focus-visible:outline-black focus-visible:outline-1 text-xl text-slate-400 mb-3" type="text"
-                name="lastname" placeholder="Last Name" />
+                name="lastName" placeholder="Last Name" required />
             <input class="block rounded-md p-2 bg-slate-900 outline-black focus-visible:outline-none focus-visible:outline-black focus-visible:outline-1 text-xl text-slate-400 mb-3" type="password"
-                name="password" placeholder="Password" />
+                name="password" placeholder="Password" required />
             <input class="block rounded-md p-2 bg-slate-900 outline-black focus-visible:outline-none focus-visible:outline-black focus-visible:outline-1 text-xl text-slate-400 mb-3" type="password"
-                name="confirmpassword" placeholder="Confirm Password" />
+                name="confirmPassword" placeholder="Confirm Password" required />
             <button type="submit" formmethod="POST" formaction="users/createAccount"
-                class="mt-5 bg-slate-900 w-2/3 p-3 font-bold text-slate-300 rounded-md text-xl shadow-md shadow-slate-900">
+                class="mt-5 bg-slate-900 w-2/3 p-3 font-bold text-slate-300 rounded-md text-xl shadow-md shadow-slate-900" required>
                 Submit
             </button>
         </form>
