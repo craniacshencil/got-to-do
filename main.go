@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	responses "github.com/craniacshencil/got_to_do/responses"
+	requests "github.com/craniacshencil/got_to_do/requests"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -25,7 +26,12 @@ func main() {
 	r.Get("/", responses.Dashboard)
 	r.Get("/signup", responses.Signup)
 
+	usersRouter := chi.NewRouter()
+	usersRouter.Post("/createAccount", requests.CreateAccount)
+
+    r.Mount("/users", usersRouter)
+ 
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal("ERROR:", err)
-    }
+	}
 }
