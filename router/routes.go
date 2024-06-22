@@ -11,8 +11,8 @@ var MainRouter *chi.Mux
 func init() {
 	MainRouter = chi.NewRouter()
 	MainRouter.Get("/", responses.Dashboard)
-	MainRouter.Get("/signup", responses.Signup)
-	MainRouter.Post("/signup", responses.Signup)
+	MainRouter.Get("/signup", responses.SignupGET)
+	MainRouter.Post("/signup", responses.SignupPOST)
 
 	usersRouter := chi.NewRouter()
 	usersRouter.Post("/createAccount", requests.CreateAccount)
