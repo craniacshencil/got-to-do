@@ -3,19 +3,21 @@ package main
 import (
 	"log"
 	"net/http"
-	"strconv"
+	"os"
 
 	router "github.com/craniacshencil/got_to_do/router"
-)
-
-const (
-	port = 8080
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("ERR: couldn't load up env file", err)
+	}
+
 	clientRouter := router.MainRouter
 	server := http.Server{
-		Addr:    ":" + strconv.Itoa(port),
+		Addr:    ":" + os.Getenv("PORT"),
 		Handler: clientRouter,
 	}
 
