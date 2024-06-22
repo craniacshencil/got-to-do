@@ -5,10 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	responses "github.com/craniacshencil/got_to_do/responses"
-	requests "github.com/craniacshencil/got_to_do/requests"
-
-	"github.com/go-chi/chi/v5"
+	router "github.com/craniacshencil/got_to_do/router"
 )
 
 const (
@@ -16,21 +13,12 @@ const (
 )
 
 func main() {
-	r := chi.NewRouter()
-
+	clientRouter := router.MainRouter
 	server := http.Server{
 		Addr:    ":" + strconv.Itoa(port),
-		Handler: r,
+		Handler: clientRouter,
 	}
 
-	r.Get("/", responses.Dashboard)
-	r.Get("/signup", responses.Signup)
-
-	usersRouter := chi.NewRouter()
-	usersRouter.Post("/createAccount", requests.CreateAccount)
-
-    r.Mount("/users", usersRouter)
- 
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal("ERROR:", err)
 	}
