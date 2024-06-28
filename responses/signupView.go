@@ -56,7 +56,6 @@ func SignupPOST(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Fatal("Messed up struct")
 		}
-		log.Printf("%s\n", signupJSON)
 		signupReadable := bytes.NewReader(signupJSON)
 
 		postURL := fmt.Sprintf("http://localhost:%s/users/createAccount", os.Getenv("PORT"))
