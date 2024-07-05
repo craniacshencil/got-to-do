@@ -1,11 +1,13 @@
-package pkg
+package handlers
 
 import (
 	"log"
 	"net/http"
 
+	"github.com/craniacshencil/got_to_do/internal/database"
 	validation "github.com/craniacshencil/got_to_do/internal/signup"
 	"github.com/craniacshencil/got_to_do/utils"
+	"github.com/google/uuid"
 )
 
 type SignupForm struct {
@@ -16,7 +18,7 @@ type SignupForm struct {
 	ConfirmPassword string
 }
 
-func SignupHandler(w http.ResponseWriter, r *http.Request) {
+func (ApiConfig *ApiCfg) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	var signupData SignupForm
 	utils.ParseJSON(r, &signupData)
 	if err := validation.ValidateSignup(signupData.Password, signupData.ConfirmPassword); err != nil {
@@ -24,5 +26,16 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	utils.WriteJSON(w, http.StatusCreated, "Success")
+	user, err := ApiConfig.DB.CreateUser(r.Context(), database.CreateUserParams{
+		ID:        uuid.New(),
+		Username:  signupData.Username,
+		FirstName: signupData.FirstName,
+		LastName:  signupData.LastName,
+	})
+	if err != nil {
+		log.Println("Err: While creating user:", err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	utils.WriteJSON(w, http.StatusCreated, user)
 }

@@ -4,17 +4,18 @@ import (
 	"log"
 	"net/http"
 
-	pkg "github.com/craniacshencil/got_to_do/pkg/signup"
+	"github.com/craniacshencil/got_to_do/pkg/handlers"
 	"github.com/craniacshencil/got_to_do/utils"
 	"github.com/go-chi/chi/v5"
 )
 
 func SetRoutes() {
 	MainRouter := chi.NewRouter()
+	apiConfig := handlers.SetupDB()
 	MainRouter.Get("/", simplePing)
 	MainRouter.Post("/", simplePing)
 	MainRouter.Put("/", simplePing)
-	MainRouter.Post("/signup", pkg.SignupHandler)
+	MainRouter.Post("/signup", apiConfig.SignupHandler)
 
 	server := &http.Server{
 		Addr:    ":8080",
