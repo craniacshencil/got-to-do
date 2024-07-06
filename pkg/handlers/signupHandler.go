@@ -10,6 +10,10 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	usernameNotUniqueErr = "pq: duplicate key value violates unique constraint \"users_username_key\""
+)
+
 type SignupForm struct {
 	Username        string
 	FirstName       string
@@ -33,9 +37,15 @@ func (ApiConfig *ApiCfg) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		LastName:  signupData.LastName,
 	})
 	if err != nil {
+		if err.Error() == usernameNotUniqueErr {
+			log.Println(usernameNotUniqueErr)
+			utils.WriteJSON(w, http.StatusInternalServerError, "Username is not unique")
+			return
+		}
 		log.Println("Err: While creating user:", err)
 		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
 	utils.WriteJSON(w, http.StatusCreated, user)
 }
