@@ -14,3 +14,8 @@ type User struct {
 	FirstName string
 	LastName  string
 }
+
+type UserPassword struct {
+	ID       uuid.UUID
+	Password string
+}

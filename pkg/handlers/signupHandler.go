@@ -6,6 +6,7 @@ import (
 
 	"github.com/craniacshencil/got_to_do/internal/database"
 	validation "github.com/craniacshencil/got_to_do/internal/signup"
+	"github.com/craniacshencil/got_to_do/pkg/passwords"
 	"github.com/craniacshencil/got_to_do/utils"
 	"github.com/google/uuid"
 )
@@ -30,6 +31,9 @@ func (ApiConfig *ApiCfg) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	// Send user details to database
+
 	user, err := ApiConfig.DB.CreateUser(r.Context(), database.CreateUserParams{
 		ID:        uuid.New(),
 		Username:  signupData.Username,
@@ -48,4 +52,23 @@ func (ApiConfig *ApiCfg) SignupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJSON(w, http.StatusCreated, user)
+
+	// Send password to database
+
+	hash, err := passwords.HashPassword(signupData.Password)
+	if err != nil {
+		log.Println(err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	password, err := ApiConfig.DB.CreatePassword(r.Context(), database.CreatePasswordParams{
+		ID:       user.ID,
+		Password: string(hash),
+	})
+	if err != nil {
+		log.Println("ERR: While storing password in DB:", err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	utils.WriteJSON(w, http.StatusCreated, password)
 }
