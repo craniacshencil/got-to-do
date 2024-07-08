@@ -28,3 +28,20 @@ func (q *Queries) CreatePassword(ctx context.Context, arg CreatePasswordParams) 
 	err := row.Scan(&i.ID, &i.Password)
 	return i, err
 }
+
+const getUsernameAndPassword = `-- name: GetUsernameAndPassword :one
+SELECT username, password FROM users NATURAL JOIN user_passwords
+WHERE username=$1
+`
+
+type GetUsernameAndPasswordRow struct {
+	Username string
+	Password string
+}
+
+func (q *Queries) GetUsernameAndPassword(ctx context.Context, username string) (GetUsernameAndPasswordRow, error) {
+	row := q.db.QueryRowContext(ctx, getUsernameAndPassword, username)
+	var i GetUsernameAndPasswordRow
+	err := row.Scan(&i.Username, &i.Password)
+	return i, err
+}

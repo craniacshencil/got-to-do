@@ -16,6 +16,7 @@ func SetRoutes() {
 	MainRouter.Post("/", simplePing)
 	MainRouter.Put("/", simplePing)
 	MainRouter.Post("/signup", apiConfig.SignupHandler)
+	MainRouter.Post("/login", apiConfig.LoginHandler)
 
 	server := &http.Server{
 		Addr:    ":8080",
