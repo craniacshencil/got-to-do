@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/craniacshencil/got_to_do/pkg/myJwt"
 	"github.com/craniacshencil/got_to_do/pkg/passwords"
 	"github.com/craniacshencil/got_to_do/utils"
 )
@@ -30,7 +31,23 @@ func (ApiConfig *ApiCfg) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	log.Println(usernameAndPassword)
+	// MAKE CHANGES HERE TO SEND JWT TO FRONTEND
+	tokenString, err := myJwt.CreateToken(username)
+	if err != nil {
+		log.Println("ERR: ", err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	jwtCookie := &http.Cookie{
+		Name:     "jwt",
+		Value:    tokenString,
+		Path:     "/",
+		MaxAge:   3600,
+		Secure:   false,
+		HttpOnly: true,
+	}
+	http.SetCookie(w, jwtCookie)
 
 	utils.WriteJSON(w, http.StatusCreated, "Success")
 }

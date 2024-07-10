@@ -12,11 +12,28 @@ import (
 func SetRoutes() {
 	MainRouter := chi.NewRouter()
 	apiConfig := handlers.SetupDB()
+	/* MainRouter.Use(cors.Handler(cors.Options{
+		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
+		AllowedOrigins: []string{"https://*", "http://*"},
+		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders: []string{
+			"Accept",
+			"Authorization",
+			"Content-Type",
+			"X-CSRF-Token",
+			"Set-Cookie",
+		},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           3600, // Maximum value not ignored by any of major browsers
+	})) */
 	MainRouter.Get("/", simplePing)
 	MainRouter.Post("/", simplePing)
 	MainRouter.Put("/", simplePing)
 	MainRouter.Post("/signup", apiConfig.SignupHandler)
 	MainRouter.Post("/login", apiConfig.LoginHandler)
+	MainRouter.Get("/random", apiConfig.RandomHandler)
 
 	server := &http.Server{
 		Addr:    ":8080",
