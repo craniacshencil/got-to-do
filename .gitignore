@@ -1,3 +1,4 @@
 *.txt
 request.sh
+login.sh
 .env

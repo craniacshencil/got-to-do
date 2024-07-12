@@ -34,8 +34,8 @@ func CreateToken(username string) (string, error) {
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": username,
 		"iss": "got-to-do",
-		"iat": time.Now().UTC(),
-		"exp": time.Now().Add(time.Hour).UTC(),
+		"iat": time.Now().Unix(),
+		"exp": time.Now().Add(time.Hour).Unix(),
 	})
 
 	// Getting the secret key
@@ -68,7 +68,7 @@ func ValidateToken(tokenString string) (*jwt.Token, error) {
 	})
 	// Case when there is an error while parsing the JSON
 	if err != nil {
-		log.Println("ERR: ", err)
+		log.Println("ERR:", err)
 		return nil, err
 	}
 

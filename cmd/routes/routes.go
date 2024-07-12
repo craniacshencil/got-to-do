@@ -33,8 +33,12 @@ func SetRoutes() {
 	MainRouter.Put("/", simplePing)
 	MainRouter.Post("/signup", apiConfig.SignupHandler)
 	MainRouter.Post("/login", apiConfig.LoginHandler)
+
 	MainRouter.Get("/random", apiConfig.RandomHandler)
 
+	UserRouter := chi.NewRouter()
+	UserRouter.Post("/", apiConfig.CreateListHandler)
+	MainRouter.Mount("/users/{user_id}/{date}", UserRouter)
 	server := &http.Server{
 		Addr:    ":8080",
 		Handler: MainRouter,
