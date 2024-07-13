@@ -20,7 +20,7 @@ RETURNING list_id, user_id, date
 
 type CreateListParams struct {
 	ListID uuid.UUID
-	UserID uuid.NullUUID
+	UserID uuid.UUID
 	Date   time.Time
 }
 

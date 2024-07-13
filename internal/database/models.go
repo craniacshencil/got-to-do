@@ -10,9 +10,17 @@ import (
 	"github.com/google/uuid"
 )
 
+type Task struct {
+	TaskID    uuid.UUID
+	ListID    uuid.NullUUID
+	TaskName  string
+	StartTime time.Time
+	EndTime   time.Time
+}
+
 type TodoList struct {
 	ListID uuid.UUID
-	UserID uuid.NullUUID
+	UserID uuid.UUID
 	Date   time.Time
 }
 

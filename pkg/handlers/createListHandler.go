@@ -6,9 +6,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/craniacshencil/got_to_do/internal/database"
 	"github.com/craniacshencil/got_to_do/pkg/myJwt"
 	"github.com/craniacshencil/got_to_do/utils"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 )
 
 type Task struct {
@@ -34,7 +36,8 @@ func (ApiConfig *ApiCfg) CreateListHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	claimsMap := token.Claims.(jwt.MapClaims)
-	userID := claimsMap["sub"]
+	userIDString := claimsMap["sub"].(string)
+	userID := uuid.MustParse(userIDString)
 
 	// Parse the json
 	var Todo map[int]Task
@@ -45,6 +48,14 @@ func (ApiConfig *ApiCfg) CreateListHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	// Get date
+	dateTimeString := Todo[1].StartTime.Format(time.DateOnly)
+	date, err := time.Parse(time.DateOnly, dateTimeString)
+	if err != nil {
+		log.Println("ERR: While extracting date out of time:", err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 	// Validate the timings make sure there is no clash
 	// Eg: One task starts and ends at: 13:00 to 14:00, if other task starts at 13:30 then error should be reported
 	err = validateTimings(Todo)
@@ -55,7 +66,17 @@ func (ApiConfig *ApiCfg) CreateListHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	// Adding the list to DB
-
+	todoEntry, err := ApiConfig.DB.CreateList(r.Context(), database.CreateListParams{
+		UserID: userID,
+		ListID: uuid.New(),
+		Date:   date,
+	})
+	if err != nil {
+		log.Println("ERR: While storing list:", err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	log.Println(todoEntry)
 }
 
 func validateTimings(taskTimings map[int]Task) error {
