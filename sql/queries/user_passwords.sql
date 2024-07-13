@@ -3,6 +3,6 @@ INSERT INTO user_passwords (id, password)
 VALUES ($1, $2)
 RETURNING *;
 
--- name: GetUsernameAndPassword :one
-SELECT username, password FROM users NATURAL JOIN user_passwords
+-- name: GetUserDetails :one
+SELECT users.id, username, password FROM users NATURAL JOIN user_passwords
 WHERE username=$1;

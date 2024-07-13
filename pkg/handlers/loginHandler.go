@@ -19,20 +19,20 @@ func (ApiConfig *ApiCfg) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	utils.ParseJSON(r, &loginData)
 	username := loginData.Username
 	password := loginData.Password
-	usernameAndPassword, err := ApiConfig.DB.GetUsernameAndPassword(r.Context(), username)
+	userDetails, err := ApiConfig.DB.GetUserDetails(r.Context(), username)
 	if err != nil {
 		log.Println("ERR: While retreiving Username and Password", err)
 		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	if err = passwords.MatchPassword(password, usernameAndPassword.Password); err != nil {
+	if err = passwords.MatchPassword(password, userDetails.Password); err != nil {
 		log.Println(err)
 		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 	// MAKE CHANGES HERE TO SEND JWT TO FRONTEND
-	tokenString, err := myJwt.CreateToken(username)
+	tokenString, err := myJwt.CreateToken(userDetails.ID.String())
 	if err != nil {
 		log.Println("ERR: ", err)
 		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())

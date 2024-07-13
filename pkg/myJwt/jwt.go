@@ -29,10 +29,10 @@ func getSecretKey() ([]byte, error) {
 	return jwtSecretKey, nil
 }
 
-func CreateToken(username string) (string, error) {
+func CreateToken(userID string) (string, error) {
 	// Creating token with the claims
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": username,
+		"sub": userID,
 		"iss": "got-to-do",
 		"iat": time.Now().Unix(),
 		"exp": time.Now().Add(time.Hour).Unix(),

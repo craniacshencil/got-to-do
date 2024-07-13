@@ -8,6 +8,7 @@ import (
 
 	"github.com/craniacshencil/got_to_do/pkg/myJwt"
 	"github.com/craniacshencil/got_to_do/utils"
+	"github.com/golang-jwt/jwt"
 )
 
 type Task struct {
@@ -18,20 +19,22 @@ type Task struct {
 
 func (ApiConfig *ApiCfg) CreateListHandler(w http.ResponseWriter, r *http.Request) {
 	// Retreive jwt token from cookies
-	token, err := r.Cookie("jwt")
+	cookie, err := r.Cookie("jwt")
 	if err != nil {
 		log.Println("ERR: Couldn't find cookie", err)
 		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	// Validate the cookie
-	_, err = myJwt.ValidateToken(token.Value)
+	// Validate the cookie, store userID
+	token, err := myJwt.ValidateToken(cookie.Value)
 	if err != nil {
 		log.Println(err)
 		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+	claimsMap := token.Claims.(jwt.MapClaims)
+	userID := claimsMap["sub"]
 
 	// Parse the json
 	var Todo map[int]Task
@@ -50,22 +53,34 @@ func (ApiConfig *ApiCfg) CreateListHandler(w http.ResponseWriter, r *http.Reques
 		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	// Adding the list to DB
+
 }
 
-func validateTimings(todo map[int]Task) error {
+func validateTimings(taskTimings map[int]Task) error {
 	// TODO: Primary validation
-	// Making sure that all the tasks have endtime > starttime
 	// Making sure all the tasks are of proper type(i think using a struct basically makes sure that this is taken care of)
 	var start, end time.Time
 	var i, j, startVal, endVal int
 	var startTimeArr, endTimeArr []int
-	for _, task := range todo {
+	for idx, task := range taskTimings {
 		start = task.StartTime
 		end = task.EndTime
 
 		// getting time in form: 13:00 to 14:00 -> 1300, 1400
 		startVal = start.Hour()*1000 + start.Minute()
 		endVal = end.Hour()*1000 + end.Minute()
+
+		// Making sure that all the tasks have endtime > starttime
+		if startVal > endVal {
+			return fmt.Errorf(
+				"endtime: %d hours is before starttime: %d hours for task %d",
+				startVal,
+				endVal,
+				idx,
+			)
+		}
 
 		startTimeArr = append(startTimeArr, startVal)
 		endTimeArr = append(endTimeArr, endVal)
@@ -78,7 +93,7 @@ func validateTimings(todo map[int]Task) error {
 			// Condition says that if startTime of a task lies in time assigned for other task
 			if startTimeArr[i] < endTimeArr[j] && startTimeArr[i] >= startTimeArr[j] {
 				return fmt.Errorf(
-					"starting time of task %d: %d\nend time of task %d: %d\nstarting time of task %d: %d\nThis is clashing",
+					"starting time of task %d : %d hours\nend time of task %d : %d hours\nstarting time of task %d: %d hours\nThis is clashing",
 					i,
 					startTimeArr[i],
 					i,

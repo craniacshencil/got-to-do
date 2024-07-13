@@ -4,5 +4,3 @@ INSERT INTO
 VALUES( $1, $2, $3, $4 )
 RETURNING *;
 
--- name: GetUsername :one
-SELECT * FROM users WHERE username=$1;
