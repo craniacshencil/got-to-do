@@ -44,3 +44,37 @@ func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, e
 	)
 	return i, err
 }
+
+const getTasks = `-- name: GetTasks :many
+SELECT task_id, list_id, task_name, start_time, end_time from tasks 
+WHERE list_id=$1
+`
+
+func (q *Queries) GetTasks(ctx context.Context, listID uuid.UUID) ([]Task, error) {
+	rows, err := q.db.QueryContext(ctx, getTasks, listID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Task
+	for rows.Next() {
+		var i Task
+		if err := rows.Scan(
+			&i.TaskID,
+			&i.ListID,
+			&i.TaskName,
+			&i.StartTime,
+			&i.EndTime,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
