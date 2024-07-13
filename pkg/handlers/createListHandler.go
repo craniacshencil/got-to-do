@@ -20,6 +20,9 @@ type Task struct {
 }
 
 func (ApiConfig *ApiCfg) CreateListHandler(w http.ResponseWriter, r *http.Request) {
+	// NOTE: Even though there the path contains both supposedly contains userID and date
+	// I forgot about them and didn't use them from the path
+
 	// Retreive jwt token from cookies
 	cookie, err := r.Cookie("jwt")
 	if err != nil {
@@ -48,7 +51,10 @@ func (ApiConfig *ApiCfg) CreateListHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Get date
+	// Get date (Not checking the date of every task as coming from the frontend all the tasks would have the same date)
+	// NOTE: Probably didn't need to do this
+	// 1. Could have retrieved it from path
+	// 2. Postgres would've converted time.Time to appropriate date format automatically(it did, with time, below in the tasks relation)
 	dateTimeString := Todo[1].StartTime.Format(time.DateOnly)
 	date, err := time.Parse(time.DateOnly, dateTimeString)
 	if err != nil {
@@ -56,7 +62,15 @@ func (ApiConfig *ApiCfg) CreateListHandler(w http.ResponseWriter, r *http.Reques
 		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	// Validate the timings make sure there is no clash
+
+	// STEP 1: Make sure date is valid
+	if date.Before(time.Now()) {
+		log.Println("ERR: Date is invalid(before today):")
+		utils.WriteJSON(w, http.StatusInternalServerError, "ERR: Date is invalid(before today):")
+		return
+	}
+
+	// STEP 2: Validate the timings make sure there is no clash
 	// Eg: One task starts and ends at: 13:00 to 14:00, if other task starts at 13:30 then error should be reported
 	err = validateTimings(Todo)
 	if err != nil {
@@ -77,44 +91,63 @@ func (ApiConfig *ApiCfg) CreateListHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	log.Println(todoEntry)
+
+	// Adding each task to DB
+	for taskNo, task := range Todo {
+		taskDB, err := ApiConfig.DB.CreateTask(r.Context(), database.CreateTaskParams{
+			TaskID:    uuid.New(),
+			ListID:    todoEntry.ListID,
+			TaskName:  task.TaskName,
+			StartTime: task.StartTime, // voila, didn't have to convert time.Time to a specific format
+			EndTime:   task.EndTime,
+		})
+		if err != nil {
+			log.Printf("ERR: Couldn't save task %d to DB: %v", taskNo, err)
+			utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		log.Println(taskDB)
+	}
+	utils.WriteJSON(
+		w,
+		http.StatusCreated,
+		"Todo list and the tasks have been added to the database",
+	)
 }
 
 func validateTimings(taskTimings map[int]Task) error {
 	// TODO: Primary validation
 	// Making sure all the tasks are of proper type(i think using a struct basically makes sure that this is taken care of)
 	var start, end time.Time
-	var i, j, startVal, endVal int
-	var startTimeArr, endTimeArr []int
+	var startTimeArr, endTimeArr []time.Time
+	var i, j int
 	for idx, task := range taskTimings {
 		start = task.StartTime
 		end = task.EndTime
 
-		// getting time in form: 13:00 to 14:00 -> 1300, 1400
-		startVal = start.Hour()*1000 + start.Minute()
-		endVal = end.Hour()*1000 + end.Minute()
-
 		// Making sure that all the tasks have endtime > starttime
-		if startVal > endVal {
+		if start.After(end) {
 			return fmt.Errorf(
-				"endtime: %d hours is before starttime: %d hours for task %d",
-				startVal,
-				endVal,
+				"endtime: %v hours is before starttime: %v hours for task %d",
+				start,
+				end,
 				idx,
 			)
 		}
 
-		startTimeArr = append(startTimeArr, startVal)
-		endTimeArr = append(endTimeArr, endVal)
+		startTimeArr = append(startTimeArr, start)
+		endTimeArr = append(endTimeArr, end)
 	}
 	for i = 0; i < len(startTimeArr); i++ {
 		for j = 0; j < len(startTimeArr); j++ {
 			if i == j {
 				continue
 			}
-			// Condition says that if startTime of a task lies in time assigned for other task
-			if startTimeArr[i] < endTimeArr[j] && startTimeArr[i] >= startTimeArr[j] {
+			// Condition says that if startTime of a task lies in time assigned for other task or startime of 2 tasks is same
+			if startTimeArr[i].Before(endTimeArr[j]) &&
+				(startTimeArr[i].After(startTimeArr[j]) || startTimeArr[i] == startTimeArr[j]) {
 				return fmt.Errorf(
-					"starting time of task %d : %d hours\nend time of task %d : %d hours\nstarting time of task %d: %d hours\nThis is clashing",
+					"starting time of task %d : %v hours\nend time of task %d : %v hours\nstarting time of task %d: %v hours\nThis is clashing",
 					i,
 					startTimeArr[i],
 					i,

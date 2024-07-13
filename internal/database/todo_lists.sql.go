@@ -30,3 +30,25 @@ func (q *Queries) CreateList(ctx context.Context, arg CreateListParams) (TodoLis
 	err := row.Scan(&i.ListID, &i.UserID, &i.Date)
 	return i, err
 }
+
+const getDateAndUser = `-- name: GetDateAndUser :one
+SELECT date, user_id from todo_lists
+WHERE date=$1 and user_id=$2
+`
+
+type GetDateAndUserParams struct {
+	Date   time.Time
+	UserID uuid.UUID
+}
+
+type GetDateAndUserRow struct {
+	Date   time.Time
+	UserID uuid.UUID
+}
+
+func (q *Queries) GetDateAndUser(ctx context.Context, arg GetDateAndUserParams) (GetDateAndUserRow, error) {
+	row := q.db.QueryRowContext(ctx, getDateAndUser, arg.Date, arg.UserID)
+	var i GetDateAndUserRow
+	err := row.Scan(&i.Date, &i.UserID)
+	return i, err
+}

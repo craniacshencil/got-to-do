@@ -2,3 +2,8 @@
 INSERT INTO todo_lists (list_id, user_id, date)
 VALUES ($1, $2, $3)
 RETURNING *;
+
+-- name: GetDateAndUser :one
+SELECT date, user_id from todo_lists
+WHERE date=$1 and user_id=$2;
+
