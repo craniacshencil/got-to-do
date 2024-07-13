@@ -5,8 +5,16 @@
 package database
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 )
+
+type TodoList struct {
+	ListID uuid.UUID
+	UserID uuid.NullUUID
+	Date   time.Time
+}
 
 type User struct {
 	ID        uuid.UUID
