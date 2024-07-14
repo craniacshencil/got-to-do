@@ -3,6 +3,7 @@ package myJwt
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -54,7 +55,7 @@ func CreateToken(userID string) (string, error) {
 	return tokenString, nil
 }
 
-func ValidateToken(tokenString string) (*jwt.Token, error) {
+func validateToken(tokenString string) (*jwt.Token, error) {
 	// parsing the tokenString to create an actual jwt Token
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -76,6 +77,23 @@ func ValidateToken(tokenString string) (*jwt.Token, error) {
 	if !token.Valid {
 		log.Println("ERR: The token is not valid")
 		return nil, fmt.Errorf("ERR: The token is not valid")
+	}
+
+	return token, nil
+}
+
+func AuthorizeUser(r *http.Request) (*jwt.Token, error) {
+	cookie, err := r.Cookie("jwt")
+	if err != nil {
+		log.Println("ERR: Couldn't find cookie", err)
+		return nil, fmt.Errorf("couldn't find cookie: %v", err)
+	}
+
+	// Validate the cookie, store userID
+	token, err := validateToken(cookie.Value)
+	if err != nil {
+		log.Println(err)
+		return nil, fmt.Errorf("%v", err)
 	}
 
 	return token, nil

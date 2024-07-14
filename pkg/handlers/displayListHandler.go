@@ -6,12 +6,20 @@ import (
 	"time"
 
 	"github.com/craniacshencil/got_to_do/internal/database"
+	"github.com/craniacshencil/got_to_do/pkg/myJwt"
 	"github.com/craniacshencil/got_to_do/utils"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
 
 func (ApiConfig *ApiCfg) DisplayListHandler(w http.ResponseWriter, r *http.Request) {
+	// Authorize user
+	_, err := myJwt.AuthorizeUser(r)
+	if err != nil {
+		log.Println(err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 	// Retrieve parameters from the url
 	userIDString := chi.URLParam(r, "user_id")
 	dateString := chi.URLParam(r, "date")

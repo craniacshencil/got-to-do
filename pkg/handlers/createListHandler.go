@@ -24,16 +24,8 @@ func (ApiConfig *ApiCfg) CreateListHandler(w http.ResponseWriter, r *http.Reques
 	// NOTE: Even though there the path contains both supposedly contains userID and date
 	// I forgot about them and didn't use them from the path
 
-	// Retreive jwt token from cookies
-	cookie, err := r.Cookie("jwt")
-	if err != nil {
-		log.Println("ERR: Couldn't find cookie", err)
-		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	// Validate the cookie, store userID
-	token, err := myJwt.ValidateToken(cookie.Value)
+	// Authorize user and get userID
+	token, err := myJwt.AuthorizeUser(r)
 	if err != nil {
 		log.Println(err)
 		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
