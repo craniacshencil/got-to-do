@@ -14,9 +14,10 @@ import (
 )
 
 type Task struct {
-	TaskName  string    `json:"task_name"`
-	StartTime time.Time `json:"start_time"`
-	EndTime   time.Time `json:"end_time"`
+	TaskName   string    `json:"task_name"`
+	StartTime  time.Time `json:"start_time"`
+	EndTime    time.Time `json:"end_time"`
+	Completion bool      `json:"completion"`
 }
 
 func (ApiConfig *ApiCfg) CreateListHandler(w http.ResponseWriter, r *http.Request) {
@@ -63,16 +64,8 @@ func (ApiConfig *ApiCfg) CreateListHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// STEP 1: Make sure date is valid
-	if date.Before(time.Now()) {
-		log.Println("ERR: Date is invalid(before today):")
-		utils.WriteJSON(w, http.StatusInternalServerError, "ERR: Date is invalid(before today):")
-		return
-	}
-
-	// STEP 2: Validate the timings make sure there is no clash
-	// Eg: One task starts and ends at: 13:00 to 14:00, if other task starts at 13:30 then error should be reported
-	err = validateTimings(Todo)
+	// Validate all todos
+	err = validateTimings(Todo, date)
 	if err != nil {
 		log.Println(err)
 		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
@@ -90,16 +83,16 @@ func (ApiConfig *ApiCfg) CreateListHandler(w http.ResponseWriter, r *http.Reques
 		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	log.Println(todoEntry)
 
 	// Adding each task to DB
 	for taskNo, task := range Todo {
 		taskDB, err := ApiConfig.DB.CreateTask(r.Context(), database.CreateTaskParams{
-			TaskID:    uuid.New(),
-			ListID:    todoEntry.ListID,
-			TaskName:  task.TaskName,
-			StartTime: task.StartTime, // voila, didn't have to convert time.Time to a specific format
-			EndTime:   task.EndTime,
+			TaskID:     uuid.New(),
+			ListID:     todoEntry.ListID,
+			TaskName:   task.TaskName,
+			StartTime:  task.StartTime, // voila, didn't have to convert time.Time to a specific format
+			EndTime:    task.EndTime,
+			Completion: task.Completion,
 		})
 		if err != nil {
 			log.Printf("ERR: Couldn't save task %d to DB: %v", taskNo, err)
@@ -108,6 +101,8 @@ func (ApiConfig *ApiCfg) CreateListHandler(w http.ResponseWriter, r *http.Reques
 		}
 		log.Println(taskDB)
 	}
+
+	// Send appropriate response
 	utils.WriteJSON(
 		w,
 		http.StatusCreated,
@@ -115,9 +110,12 @@ func (ApiConfig *ApiCfg) CreateListHandler(w http.ResponseWriter, r *http.Reques
 	)
 }
 
-func validateTimings(taskTimings map[int]Task) error {
-	// TODO: Primary validation
-	// Making sure all the tasks are of proper type(i think using a struct basically makes sure that this is taken care of)
+func validateTimings(taskTimings map[int]Task, date time.Time) error {
+	// STEP 1: Make sure date is valid
+	if date.Before(time.Now()) {
+		return fmt.Errorf("date is invalid(before today)")
+	}
+
 	var start, end time.Time
 	var startTimeArr, endTimeArr []time.Time
 	var i, j int
@@ -125,7 +123,7 @@ func validateTimings(taskTimings map[int]Task) error {
 		start = task.StartTime
 		end = task.EndTime
 
-		// Making sure that all the tasks have endtime > starttime
+		// STEP 2: Making sure that all the tasks have endtime > starttime
 		if start.After(end) {
 			return fmt.Errorf(
 				"endtime: %v hours is before starttime: %v hours for task %d",
@@ -138,6 +136,8 @@ func validateTimings(taskTimings map[int]Task) error {
 		startTimeArr = append(startTimeArr, start)
 		endTimeArr = append(endTimeArr, end)
 	}
+	// STEP 3: Validate the timings make sure there is no clash
+	// Eg: One task starts and ends at: 13:00 to 14:00, if other task starts at 13:30 then error should be reported
 	for i = 0; i < len(startTimeArr); i++ {
 		for j = 0; j < len(startTimeArr); j++ {
 			if i == j {

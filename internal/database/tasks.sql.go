@@ -13,17 +13,18 @@ import (
 )
 
 const createTask = `-- name: CreateTask :one
-INSERT INTO tasks (task_id, list_id, task_name, start_time, end_time)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING task_id, list_id, task_name, start_time, end_time
+INSERT INTO tasks (task_id, list_id, task_name, start_time, end_time, completion)
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING task_id, list_id, task_name, start_time, end_time, completion
 `
 
 type CreateTaskParams struct {
-	TaskID    uuid.UUID
-	ListID    uuid.UUID
-	TaskName  string
-	StartTime time.Time
-	EndTime   time.Time
+	TaskID     uuid.UUID
+	ListID     uuid.UUID
+	TaskName   string
+	StartTime  time.Time
+	EndTime    time.Time
+	Completion bool
 }
 
 func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, error) {
@@ -33,6 +34,7 @@ func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, e
 		arg.TaskName,
 		arg.StartTime,
 		arg.EndTime,
+		arg.Completion,
 	)
 	var i Task
 	err := row.Scan(
@@ -41,12 +43,13 @@ func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, e
 		&i.TaskName,
 		&i.StartTime,
 		&i.EndTime,
+		&i.Completion,
 	)
 	return i, err
 }
 
 const getTasks = `-- name: GetTasks :many
-SELECT task_id, list_id, task_name, start_time, end_time from tasks 
+SELECT task_id, list_id, task_name, start_time, end_time, completion from tasks 
 WHERE list_id=$1
 `
 
@@ -65,6 +68,7 @@ func (q *Queries) GetTasks(ctx context.Context, listID uuid.UUID) ([]Task, error
 			&i.TaskName,
 			&i.StartTime,
 			&i.EndTime,
+			&i.Completion,
 		); err != nil {
 			return nil, err
 		}

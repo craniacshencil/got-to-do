@@ -9,3 +9,12 @@ up:
 down:
 	@cd sql/schema && \
 	goose postgres ${GOOSE_URL} down
+
+login:
+	@bash scripts/login.sh
+
+create:
+	@bash scripts/createList.sh
+
+display:
+	@bash scripts/displayList.sh

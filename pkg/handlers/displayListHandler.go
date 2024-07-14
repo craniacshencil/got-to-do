@@ -53,6 +53,7 @@ func (ApiConfig *ApiCfg) DisplayListHandler(w http.ResponseWriter, r *http.Reque
 		taskStruct.TaskName = task.TaskName
 		taskStruct.StartTime = task.StartTime
 		taskStruct.EndTime = task.EndTime
+		taskStruct.Completion = task.Completion
 		Todos[idx] = taskStruct
 	}
 

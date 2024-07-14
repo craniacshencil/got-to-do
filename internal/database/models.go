@@ -11,11 +11,12 @@ import (
 )
 
 type Task struct {
-	TaskID    uuid.UUID
-	ListID    uuid.UUID
-	TaskName  string
-	StartTime time.Time
-	EndTime   time.Time
+	TaskID     uuid.UUID
+	ListID     uuid.UUID
+	TaskName   string
+	StartTime  time.Time
+	EndTime    time.Time
+	Completion bool
 }
 
 type TodoList struct {
