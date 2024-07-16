@@ -102,20 +102,33 @@ func (ApiConfig *ApiCfg) CreateListHandler(w http.ResponseWriter, r *http.Reques
 	)
 }
 
+// Checks for the following:
+//   - STEP 1: Make sure date is valid
+//   - STEP 2: Making sure that all the tasks have endtime > starttime
+//   - STEP 3: Validate the timings make sure there is no clash Eg: One task starts and ends at: 13:00 to 14:00, if other task starts at 13:30 then error should be reported
 func validateTimings(taskTimings map[int]Task, date time.Time) error {
-	// STEP 1: Make sure date is valid
+	// STEP 1
 	if date.Before(time.Now()) {
 		return fmt.Errorf("date is invalid(before today)")
 	}
 
-	var start, end time.Time
 	var startTimeArr, endTimeArr []time.Time
 	var i, j int
 	for idx, task := range taskTimings {
-		start = task.StartTime
-		end = task.EndTime
+		// Had to use this because directly using task.StartTime.String() does not yield RFC3339 format
+		startTimeString := task.StartTime.Format(time.TimeOnly)
+		start, err := time.Parse(time.TimeOnly, startTimeString)
+		if err != nil {
+			return fmt.Errorf("couldn't parse startime %v: %v", task.StartTime, err)
+		}
 
-		// STEP 2: Making sure that all the tasks have endtime > starttime
+		endTimeString := task.EndTime.Format(time.TimeOnly)
+		end, err := time.Parse(time.TimeOnly, endTimeString)
+		if err != nil {
+			return fmt.Errorf("couldn't parse startime %v: %v", task.EndTime, err)
+		}
+
+		// STEP 2
 		if start.After(end) {
 			return fmt.Errorf(
 				"endtime: %v hours is before starttime: %v hours for task %d",
@@ -128,8 +141,8 @@ func validateTimings(taskTimings map[int]Task, date time.Time) error {
 		startTimeArr = append(startTimeArr, start)
 		endTimeArr = append(endTimeArr, end)
 	}
-	// STEP 3: Validate the timings make sure there is no clash
-	// Eg: One task starts and ends at: 13:00 to 14:00, if other task starts at 13:30 then error should be reported
+
+	// STEP 3
 	for i = 0; i < len(startTimeArr); i++ {
 		for j = 0; j < len(startTimeArr); j++ {
 			if i == j {

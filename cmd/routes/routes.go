@@ -39,6 +39,7 @@ func SetRoutes() {
 	UserRouter := chi.NewRouter()
 	UserRouter.Post("/", apiConfig.CreateListHandler)
 	UserRouter.Get("/", apiConfig.DisplayListHandler)
+	UserRouter.Post("/{list_id}", apiConfig.AddToListHandler)
 	MainRouter.Mount("/users/{user_id}/{date}", UserRouter)
 
 	server := &http.Server{
