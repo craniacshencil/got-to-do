@@ -18,3 +18,9 @@ create:
 
 display:
 	@bash scripts/displayList.sh
+
+add:
+	@bash scripts/addList.sh
+
+reset-todos:
+	@psql -U ${DB_USER} -d ${DB_NAME} -h ${DB_HOST} -p ${DB_PORT} -f scripts/deleteTodos.sql
