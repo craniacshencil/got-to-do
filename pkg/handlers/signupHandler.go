@@ -16,11 +16,11 @@ const (
 )
 
 type SignupForm struct {
-	Username        string
-	FirstName       string
-	LastName        string
-	Password        string
-	ConfirmPassword string
+	Username        string `json:"username"`
+	FirstName       string `json:"first_name"`
+	LastName        string `json:"last_name"`
+	Password        string `json:"password"`
+	ConfirmPassword string `json:"confirm_password"`
 }
 
 func (ApiConfig *ApiCfg) SignupHandler(w http.ResponseWriter, r *http.Request) {
@@ -57,7 +57,7 @@ func (ApiConfig *ApiCfg) SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 	hash, err := passwords.HashPassword(signupData.Password)
 	if err != nil {
-		log.Println(err)
+		log.Println("ERR:", err)
 		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}

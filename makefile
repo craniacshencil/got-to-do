@@ -10,6 +10,9 @@ down:
 	@cd sql/schema && \
 	goose postgres ${GOOSE_URL} down
 
+signup:
+	@bash scripts/signup.sh
+
 login:
 	@bash scripts/login.sh
 

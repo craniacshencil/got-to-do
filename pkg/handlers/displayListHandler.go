@@ -20,7 +20,7 @@ func (ApiConfig *ApiCfg) DisplayListHandler(w http.ResponseWriter, r *http.Reque
 		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	// Retrieve parameters from the url
+	// Retrieve userid, date from the url
 	userIDString := chi.URLParam(r, "user_id")
 	dateString := chi.URLParam(r, "date")
 	userID := uuid.MustParse(userIDString)
