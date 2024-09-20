@@ -1,4 +1,4 @@
-source ../.env
+source .env
 curl -H 'Content-Type: application/json' \
   -d '{ 
         "1": { 
@@ -17,3 +17,4 @@ curl -H 'Content-Type: application/json' \
   -b c.txt \
   -X POST \
   http://localhost:8080/users/$USER_ID/2025-07-17/$LIST_ID
+echo "http://localhost:8080/users/$USER_ID/2025-07-17/$LIST_ID"

@@ -6,3 +6,12 @@ RETURNING *;
 -- name: GetTasks :many
 SELECT * from tasks 
 WHERE list_id=$1;
+
+-- name: UpdateTask :exec
+UPDATE tasks 
+SET 
+  task_name=$1, 
+  start_time=$2, 
+  end_time=$3, 
+  completion=$4 
+WHERE task_id=$5;

@@ -24,6 +24,7 @@ func (ApiConfig *ApiCfg) AddToListHandler(w http.ResponseWriter, r *http.Request
 	// Get list_id from URL
 	listIDString := chi.URLParam(r, "list_id")
 	listID := uuid.MustParse(listIDString)
+	log.Println("list-id in url: ", listID)
 	dateString := chi.URLParam(r, "date")
 	date, err := time.Parse(time.DateOnly, dateString)
 	if err != nil {
@@ -35,7 +36,9 @@ func (ApiConfig *ApiCfg) AddToListHandler(w http.ResponseWriter, r *http.Request
 	// Parse new tasks from JSON to a map
 	newTasks := make(map[int]Task)
 	utils.ParseJSON(r, &newTasks)
+	log.Println(newTasks)
 	newTasksCount := len(newTasks)
+	log.Println("list-id after fetching new tasks: ", listID)
 
 	// Get Previous tasks and add them to the map
 	existingTasks, err := ApiConfig.DB.GetTasks(r.Context(), listID)
@@ -56,17 +59,17 @@ func (ApiConfig *ApiCfg) AddToListHandler(w http.ResponseWriter, r *http.Request
 		// because i started indexing from 1
 		newTasks[len(newTasks)+1] = taskStruct
 	}
+	log.Println("list-id after fetching new tasks: ", listID)
 
 	// Validate my tasks
-	log.Println(newTasks)
 	err = validateTimings(newTasks, date)
 	if err != nil {
 		log.Println(err)
 		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+	log.Println("list-id after validating timings: ", listID)
 
-	log.Println(newTasksCount)
 	// Add new tasks to the database
 	for i := 1; i <= newTasksCount; i++ {
 		ApiConfig.DB.CreateTask(r.Context(), database.CreateTaskParams{
@@ -78,6 +81,7 @@ func (ApiConfig *ApiCfg) AddToListHandler(w http.ResponseWriter, r *http.Request
 			Completion: newTasks[i].Completion,
 		})
 	}
+	log.Println("list-id after creating tasks: ", listID)
 
 	utils.WriteJSON(w, http.StatusAccepted, "Added tasks successfully")
 }

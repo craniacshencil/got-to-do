@@ -11,19 +11,25 @@ down:
 	goose postgres ${GOOSE_URL} down
 
 signup:
-	@bash scripts/signup.sh
+	@cd scripts && bash signup.sh
 
 login:
-	@bash scripts/login.sh
+	@cd scripts && bash login.sh
 
 create:
-	@bash scripts/createList.sh
+	@cd scripts && bash createList.sh
 
 display:
-	@bash scripts/displayList.sh
+	@cd scripts && bash displayList.sh
 
 add:
-	@bash scripts/addList.sh
+	@cd scripts && bash addList.sh
+
+update:
+	@cd scripts && bash updateList.sh
+
+un-update:
+	@cd scripts && bash un-updateList.sh
 
 reset-todos:
 	@psql -U ${DB_USER} -d ${DB_NAME} -h ${DB_HOST} -p ${DB_PORT} -f scripts/deleteTodos.sql
