@@ -23,8 +23,6 @@ func (ApiConfig *ApiCfg) UpdateListHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	// Extract user, list_id
-	listIdString := chi.URLParam(r, "list_id")
-	listId := uuid.MustParse(listIdString)
 	dateString := chi.URLParam(r, "date")
 	date, err := time.Parse(time.DateOnly, dateString)
 	if err != nil {
@@ -40,25 +38,6 @@ func (ApiConfig *ApiCfg) UpdateListHandler(w http.ResponseWriter, r *http.Reques
 		log.Println("ERR: couldnt' parse incoming updated tasks: ", err)
 		utils.WriteJSON(w, http.StatusNotFound, err)
 		return
-	}
-
-	// Fetching original tasks from DB
-	oldTasksObj, err := ApiConfig.DB.GetTasks(r.Context(), listId)
-	if err != nil {
-		log.Println("ERR: couldn't get tasks from DB: ", err)
-		utils.WriteJSON(w, http.StatusNotFound, err)
-		return
-	}
-
-	// Converting to map
-	oldTasks := make(map[uuid.UUID]Task)
-	for _, task := range oldTasksObj {
-		oldTasks[task.TaskID] = Task{
-			TaskName:   task.TaskName,
-			StartTime:  task.StartTime,
-			EndTime:    task.EndTime,
-			Completion: task.Completion,
-		}
 	}
 
 	// TODO: Create struct for validating timings

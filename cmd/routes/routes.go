@@ -41,6 +41,7 @@ func SetRoutes() {
 	UserRouter.Get("/", apiConfig.DisplayListHandler)
 	UserRouter.Post("/{list_id}", apiConfig.AddToListHandler)
 	UserRouter.Put("/{list_id}", apiConfig.UpdateListHandler)
+	UserRouter.Delete("/{task_id}", apiConfig.DeleteTaskHandler)
 	MainRouter.Mount("/users/{user_id}/{date}", UserRouter)
 
 	server := &http.Server{

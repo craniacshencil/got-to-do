@@ -19,6 +19,9 @@ login:
 create:
 	@cd scripts && bash createList.sh
 
+create-delete:
+	@cd scripts && bash createDeleteList.sh
+
 display:
 	@cd scripts && bash displayList.sh
 
@@ -30,6 +33,12 @@ update:
 
 un-update:
 	@cd scripts && bash un-updateList.sh
+
+delete-task:
+	@cd scripts && bash deleteTask.sh
+
+delete-list:
+	@cd scripts && bash deleteList.sh
 
 reset-todos:
 	@psql -U ${DB_USER} -d ${DB_NAME} -h ${DB_HOST} -p ${DB_PORT} -f scripts/deleteTodos.sql

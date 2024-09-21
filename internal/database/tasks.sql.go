@@ -48,6 +48,19 @@ func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, e
 	return i, err
 }
 
+const deleteTask = `-- name: DeleteTask :execrows
+DELETE from tasks  
+WHERE task_id=$1
+`
+
+func (q *Queries) DeleteTask(ctx context.Context, taskID uuid.UUID) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteTask, taskID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const getTasks = `-- name: GetTasks :many
 SELECT task_id, list_id, task_name, start_time, end_time, completion from tasks 
 WHERE list_id=$1

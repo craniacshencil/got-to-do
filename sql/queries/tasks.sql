@@ -15,3 +15,7 @@ SET
   end_time=$3, 
   completion=$4 
 WHERE task_id=$5;
+
+-- name: DeleteTask :execrows
+DELETE from tasks  
+WHERE task_id=$1;
