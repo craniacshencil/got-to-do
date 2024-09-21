@@ -7,3 +7,7 @@ RETURNING *;
 SELECT list_id from todo_lists
 WHERE date=$1 and user_id=$2;
 
+-- name: DeleteList :execrows
+DELETE FROM todo_lists
+WHERE list_id=$1;
+

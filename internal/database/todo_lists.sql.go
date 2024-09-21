@@ -31,6 +31,19 @@ func (q *Queries) CreateList(ctx context.Context, arg CreateListParams) (TodoLis
 	return i, err
 }
 
+const deleteList = `-- name: DeleteList :execrows
+DELETE FROM todo_lists
+WHERE list_id=$1
+`
+
+func (q *Queries) DeleteList(ctx context.Context, listID uuid.UUID) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteList, listID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const getListID = `-- name: GetListID :one
 SELECT list_id from todo_lists
 WHERE date=$1 and user_id=$2

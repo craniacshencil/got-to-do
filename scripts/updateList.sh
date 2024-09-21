@@ -1,25 +1,25 @@
 source .env
 curl -H 'Content-Type: application/json' \
-  -d '{ 
-        "1555ca73-c471-4ca7-adc6-c242b1c70907": { 
+	-d '{ 
+        "d4e7be0c-a07e-4c90-8b6e-bd598956026e": { 
             "task_name": "Complete signup feature",
             "start_time": "2025-07-17T22:00:00+05:30",
             "end_time": "2025-07-17T22:30:00+05:30",
             "completion": true 
             },
-        "cfcbda5c-f16d-4d97-b0c7-9f9324e95a55": {
+        "4000c0d1-86ba-42a3-a88c-f2ae4dd0e6b8": {
             "task_name": "Do DSA",
             "start_time": "2025-07-17T08:30:00+05:30",
             "end_time": "2025-07-17T09:30:00+05:30",
             "completion": true 
             },
-        "dacbf5ff-6a8b-4047-bc35-3ed9d1d7f124": {
+        "4fb2d2b3-d549-424a-8f8c-1d738ce4d9e4": {
             "task_name": "Eat Chicken",
             "start_time": "2025-07-17T19:00:00+05:30",
             "end_time": "2025-07-17T20:30:00+05:30",
             "completion": false 
             }
     }' \
-  -b c.txt \
-  -X PUT \
-  http://localhost:8080/users/$USER_ID/2025-07-17/$LIST_ID
+	-b c.txt \
+	-X PUT \
+	http://localhost:8080/users/$USER_ID/2025-07-17/$LIST_ID
