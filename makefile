@@ -41,4 +41,6 @@ delete-list:
 	@cd scripts && bash deleteList.sh
 
 reset-todos:
-	@psql -U ${DB_USER} -d ${DB_NAME} -h ${DB_HOST} -p ${DB_PORT} -f scripts/deleteTodos.sql
+	@psql -U ${DB_USER} -d ${DB_NAME} -h ${DB_HOST} -p ${DB_PORT} -c "DELETE FROM todo_lists;"
+
+
