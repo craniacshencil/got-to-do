@@ -1,6 +1,9 @@
-include .env
+include .env.local
 run:
 	@go run cmd/main.go
+
+build:
+	@go build -o bin/got_to_do cmd/main.go 
 
 up:
 	@cd sql/schema && \
