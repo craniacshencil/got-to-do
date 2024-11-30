@@ -5,6 +5,12 @@ run:
 build:
 	@go build -o bin/got_to_do cmd/main.go 
 
+docker-build:
+	@docker build -t got_to_do:final .
+
+docker-run:
+	@docker run -dp 127.0.0.1:8080:8080 --add-host=host.docker.internal:host-gateway got_to_do:final
+
 up:
 	@cd sql/schema && \
 	goose postgres ${GOOSE_URL} up

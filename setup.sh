@@ -1,4 +1,4 @@
-source .env
+source .env.local
 # Running migrations and signing up
 make up
 echo ""
