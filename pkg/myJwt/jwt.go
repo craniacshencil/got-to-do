@@ -8,22 +8,14 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/joho/godotenv"
 )
 
 func getSecretKey() ([]byte, error) {
-	// Load .env
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("ERR: While loading .env file")
-		return nil, err
-	}
-
 	// Get secret string from .env
 	jwtSecretString := os.Getenv("SECRET_JWT_KEY")
 	if jwtSecretString == "" {
 		log.Println("ERR: Couldn't find jwt secret key in .env")
-		return nil, err
+		return nil, fmt.Errorf("couldn't find jwt secret key in .env")
 
 	}
 	jwtSecretKey := []byte(jwtSecretString)
